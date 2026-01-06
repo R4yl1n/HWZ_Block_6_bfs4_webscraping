@@ -67,9 +67,13 @@ def init_soup(url: str) -> BeautifulSoup:
 
 # TODO: Schreibt hier euren Code für die Aufgabe
 class Differences:
-    def __init__(self,name:str, price_absolut:int, price_procent:int):
+    def __init__(self, name:str, description:str, category:str, price_day1:int, price_day2:int, price_difference_absolut:int, price_procent:int):
         self.name = name
-        self.price_absolut = price_absolut
+        self.description = description
+        self.category = category
+        self.price_day1 = price_day1
+        self.price_day2 = price_day2
+        self.price_difference_absolut = price_difference_absolut
         self.price_procent = price_procent
 
 def read_create_array_and_parse(url:str) -> Product:
@@ -277,16 +281,29 @@ def compare_prices(day_one:Product, day_two:Product) -> Differences:
     if day_one.name != day_two.name:
         print("not the same products (compare_prices)")
         raise ValueError
-    price = day_one.prices - day_two.prices
+    price = round((day_one.prices - day_two.prices) *-1 ,2)
     print(day_one.name)
     print(day_one.prices, day_two.prices)
     print(price)
-    procentage = day_one.prices / 100 * day_two.prices
-    differences =Differences(name=day_one.name, price_absolut=price,price_procent=procentage)
+    procentage = round(((day_two.prices - day_one.prices) / day_one.prices) * 100,2)
+    print(procentage)
+    differences =Differences(name=day_one.name,description=day_one.description,category=day_one.category,price_day1=day_one.prices, price_day2=day_two.prices, price_difference_absolut=price,price_procent=procentage)
     return differences
 
+def write_into_csv(difference:Differences):
+
+    with open("products_reference.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Produkt", "Beschreibung", "Kategorie","Preis Tag 1 (in CHF)","Preis Tag 2 (in CHF)","Preisdifferenz (in CHF)","Preisdifferenz (in Prozent)"])
+        for i in difference:
+            writer.writerow([i.name, i.description, i.category,i.price_day1,i.price_day2,i.price_difference_absolut,i.price_procent])
 
 listDayOne = read_create_array_and_parse("http://localhost:8080/Product_Catalog_Day_1.html")
 listDayTwo = read_create_array_and_parse("http://localhost:8080/Product_Catalog_Day_2.html")
 
-compare_prices(listDayOne[2],listDayTwo[2])
+differences_list = []
+
+for i in range(len(listDayOne)):
+    differences_list.append(compare_prices(listDayOne[i],listDayTwo[i]))
+
+write_into_csv(difference=differences_list)
