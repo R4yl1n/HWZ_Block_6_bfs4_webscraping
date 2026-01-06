@@ -281,7 +281,9 @@ def compare_prices(day_one:Product, day_two:Product) -> Differences:
     if day_one.name != day_two.name:
         print("not the same products (compare_prices)")
         raise ValueError
-    price = round((day_one.prices - day_two.prices) *-1 ,2)
+    price = round((day_one.prices - day_two.prices) ,2)
+    if price !=0:
+        price *= -1
     print(day_one.name)
     print(day_one.prices, day_two.prices)
     print(price)
